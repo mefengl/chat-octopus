@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         chat-octopus
 // @namespace    https://github.com/mefengl
-// @version      0.1.4
+// @version      0.2.0
 // @description  let octopus send message for you
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
 // @author       mefengl
@@ -99,19 +99,30 @@
       const submitButton = this.getSubmitButton();
       submitButton.click();
     },
+    onSend: function (callback) {
+      const textarea = this.getTextarea();
+      if (!textarea) return;
+      textarea.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          callback();
+        }
+      });
+      const sendButton = this.getSubmitButton();
+      if (!sendButton) return;
+      sendButton.addEventListener('click', callback);
+    },
   };
   // ChatGPT send prompt to other ai
   let chatgpt_last_prompt = '';
   $(() => {
     if (menu_all.openai && location.href.includes("chat.openai")) {
-      const submit_button = chatgpt.getSubmitButton();
-      submit_button.addEventListener('click', () => {
+      chatgpt.onSend(() => {
         const textarea = chatgpt.getTextarea();
         const prompt = textarea.value;
         chatgpt_last_prompt = prompt;
         GM_setValue('bard_prompt_texts', [prompt]);
         GM_setValue('bing_prompt_texts', [prompt]);
-      })
+      });
     }
   });
   // ChatGPT response to prompt comes from other ai
@@ -148,35 +159,49 @@
   });
 
   /* ************************************************************************* */
-  function getSubmitButton() {
-    return document.querySelector('button[aria-label="Send message"]');
-  };
-  function getInputArea() {
-    return document.querySelector(".input-area");
-  };
-  function getTextarea() {
-    const inputArea = getInputArea();
-    return inputArea.querySelector('textarea');
-  };
-  function getRegenerateButton() {
-    return document.querySelector('button[aria-label="Retry"]');
-  };
-  function bard_send(text) {
-    const textarea = getTextarea();
-    textarea.value = text;
-    textarea.dispatchEvent(new Event('input'));
-    const submitButton = getSubmitButton();
-    submitButton.click();
+  const bard = {
+    getSubmitButton: function() {
+      return document.querySelector('button[aria-label="Send message"]');
+    },
+    getInputArea: function() {
+      return document.querySelector(".input-area");
+    },
+    getTextarea: function() {
+      const inputArea = this.getInputArea();
+      return inputArea.querySelector('textarea');
+    },
+    getRegenerateButton: function() {
+      return document.querySelector('button[aria-label="Retry"]');
+    },
+    send: function(text) {
+      const textarea = this.getTextarea();
+      textarea.value = text;
+      textarea.dispatchEvent(new Event('input'));
+      const submitButton = this.getSubmitButton();
+      submitButton.click();
+    },
+    onSend: function (callback) {
+      const textarea = this.getTextarea();
+      if (!textarea) return;
+      textarea.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          callback();
+        }
+      });
+      const sendButton = this.getSubmitButton();
+      if (!sendButton) return;
+      sendButton.addEventListener('click', callback);
+    },
   };
   // Bard send prompt to other ai
   let bard_last_prompt = "";
   $(async () => {
     if (menu_all.bard && location.href.includes("bard.google")) {
-      while (!getSubmitButton()) { await new Promise(resolve => setTimeout(resolve, 500)); }
-      const submit_button = getSubmitButton();
+      while (!bard.getSubmitButton()) { await new Promise(resolve => setTimeout(resolve, 500)); }
+      const submit_button = bard.getSubmitButton();
       submit_button.addEventListener('mousedown', () => {
         console.log("bard send");
-        const textarea = getTextarea();
+        const textarea = bard.getTextarea();
         const prompt = textarea.value;
         console.log(prompt);
         bard_last_prompt = prompt;
@@ -192,7 +217,7 @@
       if (+new Date() - lastTriggerTime < 500) {
         return;
       }
-      lastTriggerTime = new Date();
+      lastTriggerTime = + new Date();
       setTimeout(async () => {
         const promptTexts = new_value;
         if (promptTexts.length > 0) {
@@ -200,11 +225,11 @@
           let firstTime = true;
           while (promptTexts.length > 0) {
             if (!firstTime) { await new Promise(resolve => setTimeout(resolve, 2000)); }
-            if (!firstTime && getRegenerateButton() == undefined) { continue; }
+            if (!firstTime && bard.getRegenerateButton() == undefined) { continue; }
             firstTime = false;
             const promptText = promptTexts.shift();
             if (promptText === bard_last_prompt) { continue; }
-            bard_send(promptText);
+            bard.send(promptText);
           }
         }
       }, 0);
@@ -273,6 +298,18 @@
       const submitButton = this.getSubmitButton();
       if (!submitButton) { return null; }
       submitButton.click();
+    },
+    onSend: function (callback) {
+      const textarea = this.getTextarea();
+      if (!textarea) return;
+      textarea.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          callback();
+        }
+      });
+      const sendButton = this.getSubmitButton();
+      if (!sendButton) return;
+      sendButton.addEventListener('click', callback);
     }
   };
   // bing send prompt to other ai
