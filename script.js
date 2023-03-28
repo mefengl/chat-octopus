@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         chat-octopus
 // @namespace    https://github.com/mefengl
-// @version      0.2.3
+// @version      0.2.4
 // @description  let octopus send message for you
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
 // @author       mefengl
@@ -103,7 +103,7 @@
       const textarea = this.getTextarea();
       if (!textarea) return;
       textarea.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" && !event.shiftKey) {
           callback();
         }
       });
@@ -195,7 +195,7 @@
       const textarea = this.getTextarea();
       if (!textarea) return;
       textarea.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" && !event.shiftKey) {
           callback();
         }
       });
@@ -316,7 +316,7 @@
       const textarea = this.getTextarea();
       if (!textarea) return;
       textarea.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" && !event.shiftKey) {
           callback();
         }
       });
