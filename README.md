@@ -25,6 +25,11 @@ After installing the script, visit the websites of the AI language models you'd 
 
 You can customize the script's settings through the userscript manager's menu by enabling or disabling specific features for each AI.
 
+<!--
+<iframe src="//player.bilibili.com/player.html?aid=484231810&bvid=BV18T411q7aU&cid=1073431117&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe<iframe src="//player.bilibili.com/player.html?aid=484231810&bvid=BV18T411q7aU&cid=1073431117&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="800" height="450"> </iframe>
+-->
+Video Demo: https://www.bilibili.com/video/BV18T411q7aU
+
 ## Adding Support for More AI Models
 
 To add support for other AI models, you will need to modify the script and add the necessary configurations, such as URL patterns and DOM selectors, for each new AI model. The script is designed to be extensible, so you can easily add support for additional AI models.
@@ -32,3 +37,5 @@ To add support for other AI models, you will need to modify the script and add t
 ## License
 
 This project is licensed under the MIT License.
+
+Repository link: https://github.com/mefengl/chat-octopus
