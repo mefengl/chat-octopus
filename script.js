@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         chat-octopus
 // @namespace    https://github.com/mefengl
-// @version      0.2.2
+// @version      0.2.3
 // @description  let octopus send message for you
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
 // @author       mefengl
@@ -173,6 +173,17 @@
     getRegenerateButton: function () {
       return document.querySelector('button[aria-label="Retry"]');
     },
+    getLastPrompt: function () {
+      const promptElements = document.querySelectorAll('.query-text');
+      const lastPrompt = promptElements[promptElements.length - 1];
+      return lastPrompt;
+    },
+    getLatestPromptText: function () {
+      const lastPrompt = this.getLastPrompt();
+      if (!lastPrompt) return "";
+      const lastPromptText = lastPrompt.textContent;
+      return lastPromptText;
+    },
     send: function (text) {
       const textarea = this.getTextarea();
       textarea.value = text;
@@ -201,7 +212,10 @@
       bard.onSend(() => {
         console.log("bard send");
         const textarea = bard.getTextarea();
-        const prompt = textarea.value;
+        let prompt = textarea.value;
+        if (!prompt) {
+          prompt = bard.getLatestPromptText();
+        }
         console.log(prompt);
         bard_last_prompt = prompt;
         GM_setValue('chatgpt_prompt_texts', [prompt]);
