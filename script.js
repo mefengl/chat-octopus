@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         chat-octopus
 // @namespace    https://github.com/mefengl
-// @version      0.1.2
+// @version      0.1.4
 // @description  let octopus send message for you
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
 // @author       mefengl
@@ -69,42 +69,44 @@
   update_menu();
 
   /* ************************************************************************* */
-  const get_submit_button = () => {
-    const form = document.querySelector('form');
-    const buttons = form.querySelectorAll('button');
-    const result = buttons[buttons.length - 1]; // by textContent maybe better
-    return result;
-  };
-  const get_textarea = () => {
-    const form = document.querySelector('form');
-    const textareas = form.querySelectorAll('textarea');
-    const result = textareas[0];
-    return result;
-  };
-  const get_regenerate_button = () => {
-    const form = document.querySelector('form');
-    const buttons = form.querySelectorAll('button');
-    for (let i = 0; i < buttons.length; i++) {
-      const buttonText = buttons[i].textContent.trim().toLowerCase();
-      if (buttonText.includes('regenerate')) {
-        return buttons[i];
+  const chatgpt = {
+    getSubmitButton: function () {
+      const form = document.querySelector('form');
+      const buttons = form.querySelectorAll('button');
+      const result = buttons[buttons.length - 1];
+      return result;
+    },
+    getTextarea: function () {
+      const form = document.querySelector('form');
+      const textareas = form.querySelectorAll('textarea');
+      const result = textareas[0];
+      return result;
+    },
+    getRegenerateButton: function () {
+      const form = document.querySelector('form');
+      const buttons = form.querySelectorAll('button');
+      for (let i = 0; i < buttons.length; i++) {
+        const buttonText = buttons[i].textContent.trim().toLowerCase();
+        if (buttonText.includes('regenerate')) {
+          return buttons[i];
+        }
       }
-    }
-  };
-  const chatgpt_send = (text) => {
-    const textarea = get_textarea();
-    textarea.value = text;
-    textarea.dispatchEvent(new Event('input'));
-    const submitButton = get_submit_button();
-    submitButton.click();
+    },
+    send: function (text) {
+      const textarea = this.getTextarea();
+      textarea.value = text;
+      textarea.dispatchEvent(new Event('input'));
+      const submitButton = this.getSubmitButton();
+      submitButton.click();
+    },
   };
   // ChatGPT send prompt to other ai
   let chatgpt_last_prompt = '';
   $(() => {
     if (menu_all.openai && location.href.includes("chat.openai")) {
-      const submit_button = get_submit_button();
+      const submit_button = chatgpt.getSubmitButton();
       submit_button.addEventListener('click', () => {
-        const textarea = get_textarea();
+        const textarea = chatgpt.getTextarea();
         const prompt = textarea.value;
         chatgpt_last_prompt = prompt;
         GM_setValue('bard_prompt_texts', [prompt]);
@@ -123,7 +125,7 @@
         if (+new Date() - last_trigger_time < 500) {
           return;
         }
-        last_trigger_time = new Date();
+        last_trigger_time = + new Date();
         setTimeout(async () => {
           const prompt_texts = new_value;
           if (prompt_texts.length > 0) {
@@ -131,12 +133,12 @@
             let firstTime = true;
             while (prompt_texts.length > 0) {
               if (!firstTime) { await new Promise(resolve => setTimeout(resolve, 2000)); }
-              if (!firstTime && get_regenerate_button() == undefined) { continue; }
+              if (!firstTime && chatgpt.getRegenerateButton() == undefined) { continue; }
               firstTime = false;
               const prompt_text = prompt_texts.shift();
               if (prompt_text === chatgpt_last_prompt) { continue; }
               console.log("chatgpt send prompt_text", prompt_text);
-              chatgpt_send(prompt_text);
+              chatgpt.send(prompt_text);
             }
           }
         }, 0);
