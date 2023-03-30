@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         chat-octopus
 // @namespace    https://github.com/mefengl
-// @version      0.2.4
+// @version      0.2.6
 // @description  let octopus send message for you
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
 // @author       mefengl
@@ -112,9 +112,7 @@
       if (!textarea) return;
       textarea.value = text;
       textarea.dispatchEvent(new Event('input', { bubbles: true }));
-      const submitButton = this.getSubmitButton();
-      if (!submitButton) return;
-      submitButton.click();
+      textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     },
     onSend: function (callback) {
       const textarea = this.getTextarea();
