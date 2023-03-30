@@ -72,31 +72,48 @@
   const chatgpt = {
     getSubmitButton: function () {
       const form = document.querySelector('form');
+      if (!form) return;
       const buttons = form.querySelectorAll('button');
       const result = buttons[buttons.length - 1];
       return result;
     },
     getTextarea: function () {
       const form = document.querySelector('form');
+      if (!form) return;
       const textareas = form.querySelectorAll('textarea');
       const result = textareas[0];
       return result;
     },
     getRegenerateButton: function () {
       const form = document.querySelector('form');
+      if (!form) return;
       const buttons = form.querySelectorAll('button');
       for (let i = 0; i < buttons.length; i++) {
-        const buttonText = buttons[i].textContent.trim().toLowerCase();
-        if (buttonText.includes('regenerate')) {
+        const buttonText = buttons[i]?.textContent?.trim().toLowerCase();
+        if (buttonText?.includes('regenerate')) {
+          return buttons[i];
+        }
+      }
+    },
+    getStopGeneratingButton: function () {
+      const form = document.querySelector('form');
+      if (!form) return;
+      const buttons = form.querySelectorAll('button');
+      if (buttons.length === 0) return;
+      for (let i = 0; i < buttons.length; i++) {
+        const buttonText = buttons[i]?.textContent?.trim().toLowerCase();
+        if (buttonText?.includes('stop')) {
           return buttons[i];
         }
       }
     },
     send: function (text) {
       const textarea = this.getTextarea();
+      if (!textarea) return;
       textarea.value = text;
-      textarea.dispatchEvent(new Event('input'));
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
       const submitButton = this.getSubmitButton();
+      if (!submitButton) return;
       submitButton.click();
     },
     onSend: function (callback) {
