@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         chat-octopus
 // @namespace    https://github.com/mefengl
-// @version      0.2.6
+// @version      0.2.7
 // @description  let octopus send message for you
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
 // @author       mefengl
 // @match        https://chat.openai.com/*
 // @match        https://bard.google.com/*
-// @match        https://www.bing.com/search?q=Bing+AI*
+// @match        https://www.bing.com/search*q=Bing+AI*
 // @require      https://cdn.staticfile.org/jquery/3.6.1/jquery.min.js
 // @grant        GM_openInTab
 // @grant        GM_registerMenuCommand
