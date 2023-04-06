@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         chat-octopus
 // @namespace    https://github.com/mefengl
-// @version      0.2.8
+// @version      0.2.11
 // @description  let octopus send message for you
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
 // @author       mefengl
@@ -38,6 +38,291 @@
       step((generator = generator.apply(__this, __arguments)).next());
     });
   };
+
+  // ../../packages/chatkit/dist/index.mjs
+  function getTextarea() {
+    const form = document.querySelector("form");
+    if (!form)
+      return;
+    const textareas = form.querySelectorAll("textarea");
+    const result = textareas[0];
+    return result;
+  }
+  function getSubmitButton() {
+    const form = document.querySelector("form");
+    if (!form)
+      return;
+    const buttons = form.querySelectorAll("button");
+    const result = buttons[buttons.length - 1];
+    return result;
+  }
+  function getRegenerateButton() {
+    const form = document.querySelector("form");
+    if (!form)
+      return;
+    const buttons = form.querySelectorAll("button");
+    const result = Array.from(buttons).find((button) => {
+      var _a;
+      return (_a = button.textContent) == null ? void 0 : _a.trim().toLowerCase().includes("regenerate");
+    });
+    return result;
+  }
+  function getStopGeneratingButton() {
+    const form = document.querySelector("form");
+    if (!form)
+      return;
+    const buttons = form.querySelectorAll("button");
+    const result = Array.from(buttons).find((button) => {
+      var _a;
+      return (_a = button.textContent) == null ? void 0 : _a.trim().toLowerCase().includes("stop generating");
+    });
+    return result;
+  }
+  function getLastResponseElement() {
+    const responseElements = document.querySelectorAll(".group.w-full");
+    return responseElements[responseElements.length - 1];
+  }
+  function getLastResponse() {
+    const lastResponseElement = getLastResponseElement();
+    if (!lastResponseElement)
+      return;
+    const lastResponse = lastResponseElement.textContent;
+    return lastResponse;
+  }
+  function getTextareaValue() {
+    var _a;
+    return ((_a = getTextarea()) == null ? void 0 : _a.value) || "";
+  }
+  function setTextarea(message) {
+    const textarea = getTextarea();
+    if (!textarea)
+      return;
+    textarea.value = message;
+    textarea.dispatchEvent(new Event("input"));
+  }
+  function send(message) {
+    setTextarea(message);
+    const textarea = getTextarea();
+    if (!textarea)
+      return;
+    textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  }
+  function onSend(callback) {
+    const textarea = getTextarea();
+    if (!textarea)
+      return;
+    textarea.addEventListener("keydown", function(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        callback();
+      }
+    });
+    const sendButton = getSubmitButton();
+    if (!sendButton)
+      return;
+    sendButton.addEventListener("mousedown", callback);
+  }
+  function waitForIdle() {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (!getStopGeneratingButton()) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 1e3);
+    });
+  }
+  var chatgpt = {
+    getTextarea,
+    getSubmitButton,
+    getRegenerateButton,
+    getStopGeneratingButton,
+    getLastResponseElement,
+    getLastResponse,
+    getTextareaValue,
+    setTextarea,
+    send,
+    onSend,
+    waitForIdle
+  };
+  var chatgpt_default = chatgpt;
+  function getSubmitButton2() {
+    return document.querySelector('button[aria-label="Send message"]');
+  }
+  function getInputArea() {
+    return document.querySelector(".input-area");
+  }
+  function getTextarea2() {
+    const inputArea = getInputArea();
+    return inputArea ? inputArea.querySelector("textarea") : null;
+  }
+  function getRegenerateButton2() {
+    return document.querySelector('button[aria-label="Retry"]');
+  }
+  function getLastPrompt() {
+    const promptElements = document.querySelectorAll(".query-text");
+    const lastPrompt = promptElements[promptElements.length - 1];
+    return lastPrompt;
+  }
+  function getLatestPromptText() {
+    const lastPrompt = getLastPrompt();
+    if (!lastPrompt)
+      return "";
+    const lastPromptText = lastPrompt.textContent;
+    return lastPromptText || "";
+  }
+  function send2(text) {
+    const textarea = getTextarea2();
+    if (!textarea)
+      return;
+    textarea.value = text;
+    textarea.dispatchEvent(new Event("input"));
+    const submitButton = getSubmitButton2();
+    if (!submitButton)
+      return;
+    submitButton.click();
+  }
+  function onSend2(callback) {
+    const textarea = getTextarea2();
+    if (!textarea)
+      return;
+    textarea.addEventListener("keydown", function(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        callback();
+      }
+    });
+    const sendButton = getSubmitButton2();
+    if (!sendButton)
+      return;
+    sendButton.addEventListener("mousedown", callback);
+  }
+  var bard = {
+    getSubmitButton: getSubmitButton2,
+    getInputArea,
+    getTextarea: getTextarea2,
+    getRegenerateButton: getRegenerateButton2,
+    getLastPrompt,
+    getLatestPromptText,
+    send: send2,
+    onSend: onSend2
+  };
+  var bard_default = bard;
+  function getActionBar() {
+    var _a, _b, _c;
+    return ((_c = (_b = (_a = document.querySelector("cib-serp")) == null ? void 0 : _a.shadowRoot) == null ? void 0 : _b.querySelector("cib-action-bar")) == null ? void 0 : _c.shadowRoot) || null;
+  }
+  function getSubmitButton3() {
+    const actionBar = getActionBar();
+    if (!actionBar) {
+      return null;
+    }
+    return actionBar.querySelector('button[aria-label="Submit"]');
+  }
+  function getTextarea3() {
+    const actionBar = getActionBar();
+    if (!actionBar) {
+      return null;
+    }
+    return actionBar.querySelector("textarea");
+  }
+  function getStopGeneratingButton2() {
+    var _a, _b;
+    const actionBar = getActionBar();
+    if (!actionBar) {
+      return null;
+    }
+    const stopGeneratingButton = (_b = (_a = actionBar.querySelector("cib-typing-indicator")) == null ? void 0 : _a.shadowRoot) == null ? void 0 : _b.querySelector('button[aria-label="Stop Responding"]');
+    if (!stopGeneratingButton) {
+      return null;
+    }
+    if (stopGeneratingButton.disabled) {
+      return null;
+    }
+    return stopGeneratingButton;
+  }
+  function getNewChatButton() {
+    const actionBar = getActionBar();
+    if (!actionBar) {
+      return null;
+    }
+    return actionBar.querySelector('button[aria-label="New topic"]');
+  }
+  function getConversation() {
+    var _a, _b, _c;
+    return ((_c = (_b = (_a = document.querySelector("cib-serp")) == null ? void 0 : _a.shadowRoot) == null ? void 0 : _b.querySelector("cib-conversation")) == null ? void 0 : _c.shadowRoot) || null;
+  }
+  function getChatTurns() {
+    const conversation = getConversation();
+    if (!conversation) {
+      return null;
+    }
+    return Array.from(conversation.querySelectorAll("cib-chat-turn")).map((t) => t.shadowRoot);
+  }
+  function getLastChatTurn() {
+    const chatTurns = getChatTurns();
+    if (!chatTurns) {
+      return null;
+    }
+    return chatTurns[chatTurns.length - 1];
+  }
+  function getLastResponse2() {
+    var _a;
+    const lastChatTurn = getLastChatTurn();
+    if (!lastChatTurn) {
+      return null;
+    }
+    return ((_a = lastChatTurn.querySelectorAll("cib-message-group")[1]) == null ? void 0 : _a.shadowRoot) || null;
+  }
+  function getLastResponseText() {
+    var _a;
+    const lastResponse = getLastResponse2();
+    if (!lastResponse) {
+      return null;
+    }
+    const message = Array.from(lastResponse.querySelectorAll("cib-message")).map((m) => m.shadowRoot).find((m) => m == null ? void 0 : m.querySelector("cib-shared"));
+    return ((_a = message == null ? void 0 : message.textContent) == null ? void 0 : _a.trim()) || null;
+  }
+  function send3(text) {
+    const textarea = getTextarea3();
+    if (!textarea) {
+      return;
+    }
+    textarea.value = text;
+    textarea.dispatchEvent(new Event("input"));
+    const submitButton = getSubmitButton3();
+    if (!submitButton) {
+      return;
+    }
+    submitButton.click();
+  }
+  function onSend3(callback) {
+    const textarea = getTextarea3();
+    if (!textarea)
+      return;
+    textarea.addEventListener("keydown", function(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        callback();
+      }
+    });
+    const sendButton = getSubmitButton3();
+    if (!sendButton)
+      return;
+    sendButton.addEventListener("mousedown", callback);
+  }
+  var bingchat = {
+    getActionBar,
+    getSubmitButton: getSubmitButton3,
+    getTextarea: getTextarea3,
+    getStopGeneratingButton: getStopGeneratingButton2,
+    getNewChatButton,
+    getConversation,
+    getChatTurns,
+    getLastChatTurn,
+    getLastResponse: getLastResponse2,
+    getLastResponseText,
+    send: send3,
+    onSend: onSend3
+  };
+  var bingchat_default = bingchat;
 
   // src/index.js
   (function() {
@@ -82,79 +367,11 @@
       GM_setValue("menu_id", menu_id);
     }
     update_menu();
-    const chatgpt = {
-      getSubmitButton: function() {
-        const form = document.querySelector("form");
-        if (!form)
-          return;
-        const buttons = form.querySelectorAll("button");
-        const result = buttons[buttons.length - 1];
-        return result;
-      },
-      getTextarea: function() {
-        const form = document.querySelector("form");
-        if (!form)
-          return;
-        const textareas = form.querySelectorAll("textarea");
-        const result = textareas[0];
-        return result;
-      },
-      getRegenerateButton: function() {
-        var _a, _b;
-        const form = document.querySelector("form");
-        if (!form)
-          return;
-        const buttons = form.querySelectorAll("button");
-        for (let i = 0; i < buttons.length; i++) {
-          const buttonText = (_b = (_a = buttons[i]) == null ? void 0 : _a.textContent) == null ? void 0 : _b.trim().toLowerCase();
-          if (buttonText == null ? void 0 : buttonText.includes("regenerate")) {
-            return buttons[i];
-          }
-        }
-      },
-      getStopGeneratingButton: function() {
-        var _a, _b;
-        const form = document.querySelector("form");
-        if (!form)
-          return;
-        const buttons = form.querySelectorAll("button");
-        if (buttons.length === 0)
-          return;
-        for (let i = 0; i < buttons.length; i++) {
-          const buttonText = (_b = (_a = buttons[i]) == null ? void 0 : _a.textContent) == null ? void 0 : _b.trim().toLowerCase();
-          if (buttonText == null ? void 0 : buttonText.includes("stop")) {
-            return buttons[i];
-          }
-        }
-      },
-      send: function(text) {
-        const textarea = this.getTextarea();
-        if (!textarea)
-          return;
-        textarea.value = text;
-        textarea.dispatchEvent(new Event("input", { bubbles: true }));
-        textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-      },
-      onSend: function(callback) {
-        const textarea = this.getTextarea();
-        if (!textarea)
-          return;
-        textarea.addEventListener("keydown", function(event) {
-          if (event.key === "Enter" && !event.shiftKey) {
-            callback();
-          }
-        });
-        const sendButton = this.getSubmitButton();
-        if (!sendButton)
-          return;
-        sendButton.addEventListener("mousedown", callback);
-      }
-    };
     let chatgpt_last_prompt = "";
     $(() => {
       if (menu_all.openai && location.href.includes("chat.openai")) {
-        chatgpt.onSend(() => {
-          const textarea = chatgpt.getTextarea();
+        chatgpt_default.onSend(() => {
+          const textarea = chatgpt_default.getTextarea();
           const prompt = textarea.value;
           chatgpt_last_prompt = prompt;
           GM_setValue("bard_prompt_texts", [prompt]);
@@ -165,10 +382,7 @@
     let last_trigger_time = +/* @__PURE__ */ new Date();
     $(() => {
       if (location.href.includes("chat.openai")) {
-        console.log("chatgpt add value change listener");
         GM_addValueChangeListener("chatgpt_prompt_texts", (name, old_value, new_value) => {
-          console.log("prompt_texts changed in chatgpt");
-          console.log(new_value);
           if (+/* @__PURE__ */ new Date() - last_trigger_time < 500) {
             return;
           }
@@ -181,7 +395,7 @@
                 if (!firstTime) {
                   yield new Promise((resolve) => setTimeout(resolve, 2e3));
                 }
-                if (!firstTime && chatgpt.getRegenerateButton() == void 0) {
+                if (!firstTime && chatgpt_default.getRegenerateButton() == void 0) {
                   continue;
                 }
                 firstTime = false;
@@ -189,8 +403,7 @@
                 if (prompt_text === chatgpt_last_prompt) {
                   continue;
                 }
-                console.log("chatgpt send prompt_text", prompt_text);
-                chatgpt.send(prompt_text);
+                chatgpt_default.send(prompt_text);
               }
             }
           }), 0);
@@ -198,68 +411,18 @@
         });
       }
     });
-    const bard = {
-      getSubmitButton: function() {
-        return document.querySelector('button[aria-label="Send message"]');
-      },
-      getInputArea: function() {
-        return document.querySelector(".input-area");
-      },
-      getTextarea: function() {
-        const inputArea = this.getInputArea();
-        return inputArea.querySelector("textarea");
-      },
-      getRegenerateButton: function() {
-        return document.querySelector('button[aria-label="Retry"]');
-      },
-      getLastPrompt: function() {
-        const promptElements = document.querySelectorAll(".query-text");
-        const lastPrompt = promptElements[promptElements.length - 1];
-        return lastPrompt;
-      },
-      getLatestPromptText: function() {
-        const lastPrompt = this.getLastPrompt();
-        if (!lastPrompt)
-          return "";
-        const lastPromptText = lastPrompt.textContent;
-        return lastPromptText;
-      },
-      send: function(text) {
-        const textarea = this.getTextarea();
-        textarea.value = text;
-        textarea.dispatchEvent(new Event("input"));
-        const submitButton = this.getSubmitButton();
-        submitButton.click();
-      },
-      onSend: function(callback) {
-        const textarea = this.getTextarea();
-        if (!textarea)
-          return;
-        textarea.addEventListener("keydown", function(event) {
-          if (event.key === "Enter" && !event.shiftKey) {
-            callback();
-          }
-        });
-        const sendButton = this.getSubmitButton();
-        if (!sendButton)
-          return;
-        sendButton.addEventListener("mousedown", callback);
-      }
-    };
     let bard_last_prompt = "";
     $(() => __async(this, null, function* () {
       if (menu_all.bard && location.href.includes("bard.google")) {
-        while (!bard.getSubmitButton()) {
+        while (!bard_default.getSubmitButton()) {
           yield new Promise((resolve) => setTimeout(resolve, 500));
         }
-        bard.onSend(() => {
-          console.log("bard send");
-          const textarea = bard.getTextarea();
+        bard_default.onSend(() => {
+          const textarea = bard_default.getTextarea();
           let prompt = textarea.value;
           if (!prompt) {
-            prompt = bard.getLatestPromptText();
+            prompt = bard_default.getLatestPromptText();
           }
-          console.log(prompt);
           bard_last_prompt = prompt;
           GM_setValue("chatgpt_prompt_texts", [prompt]);
           GM_setValue("bing_prompt_texts", [prompt]);
@@ -281,7 +444,7 @@
               if (!firstTime) {
                 yield new Promise((resolve) => setTimeout(resolve, 2e3));
               }
-              if (!firstTime && bard.getRegenerateButton() == void 0) {
+              if (!firstTime && bard_default.getRegenerateButton() == void 0) {
                 continue;
               }
               firstTime = false;
@@ -289,128 +452,22 @@
               if (promptText === bard_last_prompt) {
                 continue;
               }
-              bard.send(promptText);
+              bard_default.send(promptText);
             }
           }
         }), 0);
         GM_setValue("bard_prompt_texts", []);
       });
     }
-    const bing = {
-      getActionBar: function() {
-        var _a, _b, _c;
-        return (_c = (_b = (_a = document.querySelector("cib-serp")) == null ? void 0 : _a.shadowRoot) == null ? void 0 : _b.querySelector("cib-action-bar")) == null ? void 0 : _c.shadowRoot;
-      },
-      getSubmitButton: function() {
-        const actionBar = this.getActionBar();
-        if (!actionBar) {
-          return null;
-        }
-        return actionBar.querySelector('button[aria-label="Submit"]');
-      },
-      getTextarea: function() {
-        const actionBar = this.getActionBar();
-        if (!actionBar) {
-          return null;
-        }
-        return actionBar.querySelector("textarea");
-      },
-      getStopGeneratingButton: function() {
-        var _a, _b;
-        const actionBar = this.getActionBar();
-        if (!actionBar) {
-          return null;
-        }
-        const stopGeneratingButton = (_b = (_a = actionBar.querySelector("cib-typing-indicator")) == null ? void 0 : _a.shadowRoot) == null ? void 0 : _b.querySelector('button[aria-label="Stop Responding"]');
-        if (!stopGeneratingButton) {
-          return null;
-        }
-        if (stopGeneratingButton.disabled) {
-          return null;
-        }
-        return stopGeneratingButton;
-      },
-      getNewChatButton: function() {
-        const actionBar = this.getActionBar();
-        if (!actionBar) {
-          return null;
-        }
-        return actionBar.querySelector('button[aria-label="New topic"]');
-      },
-      getConversation: function() {
-        var _a, _b, _c;
-        return (_c = (_b = (_a = document.querySelector("cib-serp")) == null ? void 0 : _a.shadowRoot) == null ? void 0 : _b.querySelector("cib-conversation")) == null ? void 0 : _c.shadowRoot;
-      },
-      getChatTurns: function() {
-        const conversation = this.getConversation();
-        if (!conversation) {
-          return null;
-        }
-        return Array.from(conversation.querySelectorAll("cib-chat-turn")).map((t) => t.shadowRoot);
-      },
-      getLastChatTurn: function() {
-        const chatTurns = this.getChatTurns();
-        if (!chatTurns) {
-          return null;
-        }
-        return chatTurns[chatTurns.length - 1];
-      },
-      getLastResponse: function() {
-        var _a;
-        const lastChatTurn = this.getLastChatTurn();
-        if (!lastChatTurn) {
-          return null;
-        }
-        return (_a = lastChatTurn.querySelectorAll("cib-message-group")[1]) == null ? void 0 : _a.shadowRoot;
-      },
-      getLastResponseText: function() {
-        const lastResponse = this.getLastResponse();
-        if (!lastResponse) {
-          return null;
-        }
-        return Array.from(lastResponse.querySelectorAll("cib-message")).map((m) => m.shadowRoot).find((m) => m.querySelector("cib-shared")).textContent.trim();
-      },
-      send: function(text) {
-        const textarea = this.getTextarea();
-        if (!textarea) {
-          return null;
-        }
-        textarea.value = text;
-        textarea.dispatchEvent(new Event("input"));
-        const submitButton = this.getSubmitButton();
-        if (!submitButton) {
-          return null;
-        }
-        submitButton.click();
-      },
-      onSend: function(callback) {
-        const textarea = this.getTextarea();
-        if (!textarea)
-          return;
-        textarea.addEventListener("keydown", function(event) {
-          if (event.key === "Enter" && !event.shiftKey) {
-            callback();
-          }
-        });
-        const sendButton = this.getSubmitButton();
-        if (!sendButton)
-          return;
-        sendButton.addEventListener("mousedown", callback);
-      }
-    };
     let bing_last_prompt = "";
     $(() => __async(this, null, function* () {
       if (menu_all.bing && location.href.includes("Bing+AI")) {
-        console.log("bing");
-        while (!bing.getSubmitButton()) {
+        while (!bingchat_default.getSubmitButton()) {
           yield new Promise((resolve) => setTimeout(resolve, 500));
         }
-        console.log("get bing submit button");
-        bing.onSend(() => {
-          console.log("bing send");
-          const textarea = bing.getTextarea();
+        bingchat_default.onSend(() => {
+          const textarea = bingchat_default.getTextarea();
           const prompt = textarea.value;
-          console.log(prompt);
           bing_last_prompt = prompt;
           GM_setValue("chatgpt_prompt_texts", [prompt]);
           GM_setValue("bard_prompt_texts", [prompt]);
@@ -432,7 +489,7 @@
               if (!firstTime) {
                 yield new Promise((resolve) => setTimeout(resolve, 2e3));
               }
-              if (!firstTime && bing.getStopGeneratingButton() != void 0) {
+              if (!firstTime && bingchat_default.getStopGeneratingButton() != void 0) {
                 continue;
               }
               firstTime = false;
@@ -440,8 +497,7 @@
               if (prompt_text === bing_last_prompt) {
                 continue;
               }
-              console.log("bing send prompt_text", prompt_text);
-              bing.send(prompt_text);
+              bingchat_default.send(prompt_text);
             }
           }
         }), 0);
