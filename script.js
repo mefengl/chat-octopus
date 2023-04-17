@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         chat-octopus
 // @namespace    https://github.com/mefengl
-// @version      0.2.11
-// @description  let octopus send message for you
+// @version      0.2.12
+// @description  🐙 let octopus send multiple messages for you
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
 // @author       mefengl
 // @match        https://chat.openai.com/*
 // @match        https://bard.google.com/*
-// @match        https://www.bing.com/search*q=Bing+AI*
+// @match        https://www.bing.com/search?q=Bing+AI*
 // @require      https://cdn.staticfile.org/jquery/3.6.1/jquery.min.js
 // @grant        GM_openInTab
 // @grant        GM_registerMenuCommand
@@ -15,7 +15,28 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_addValueChangeListener
-// @license MIT
+// @license      MIT
+
+// @name:en      Chat Octopus
+// @description:en 🐙 let octopus send multiple messages for you
+// @name:zh-CN   聊天章鱼
+// @description:zh-CN 🐙 让章鱼为您发送多条信息
+// @name:es      Chat Pulpo
+// @description:es 🐙 deja que el pulpo envíe múltiples mensajes por ti
+// @name:hi      चैट ऑक्टोपस
+// @description:hi 🐙 आपके लिए कई संदेश भेजने के लिए ऑक्टोपस की अनुमति दें
+// @name:ar      أخطبوط الدردشة
+// @description:ar 🐙 دع الأخطبوط يرسل رسائل متعددة نيابة عنك
+// @name:pt      Chat Polvo
+// @description:pt 🐙 deixe o polvo enviar várias mensagens para você
+// @name:ru      Чат-осьминог
+// @description:ru 🐙 позвольте осьминогу отправлять несколько сообщений за вас
+// @name:ja      チャットオクトパス
+// @description:ja 🐙 タコがあなたに代わって複数のメッセージを送る
+// @name:de      Chat-Oktopus
+// @description:de 🐙 Lassen Sie den Oktopus mehrere Nachrichten für Sie senden
+// @name:fr      Chat Poulpe
+// @description:fr 🐙 laissez la pieuvre envoyer plusieurs messages pour vous
 // ==/UserScript==
 (() => {
   var __async = (__this, __arguments, generator) => {
@@ -49,12 +70,10 @@
     return result;
   }
   function getSubmitButton() {
-    const form = document.querySelector("form");
-    if (!form)
+    const textarea = getTextarea();
+    if (!textarea)
       return;
-    const buttons = form.querySelectorAll("button");
-    const result = buttons[buttons.length - 1];
-    return result;
+    return textarea.nextElementSibling;
   }
   function getRegenerateButton() {
     const form = document.querySelector("form");
@@ -107,6 +126,12 @@
       return;
     textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
   }
+  function regenerate() {
+    const regenerateButton = getRegenerateButton();
+    if (!regenerateButton)
+      return;
+    regenerateButton.click();
+  }
   function onSend(callback) {
     const textarea = getTextarea();
     if (!textarea)
@@ -121,15 +146,48 @@
       return;
     sendButton.addEventListener("mousedown", callback);
   }
+  function isGenerating() {
+    var _a, _b;
+    return ((_b = (_a = getSubmitButton()) == null ? void 0 : _a.firstElementChild) == null ? void 0 : _b.childElementCount) === 3;
+  }
   function waitForIdle() {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
-        if (!getStopGeneratingButton()) {
+        if (!isGenerating()) {
           clearInterval(interval);
           resolve();
         }
       }, 1e3);
     });
+  }
+  function setListener(key = "prompt_texts") {
+    let last_trigger_time = +/* @__PURE__ */ new Date();
+    if (location.href.includes("chat.openai")) {
+      GM_addValueChangeListener(key, (name, old_value, new_value) => __async(this, null, function* () {
+        if (+/* @__PURE__ */ new Date() - last_trigger_time < 500) {
+          return;
+        }
+        last_trigger_time = +/* @__PURE__ */ new Date();
+        setTimeout(() => __async(this, null, function* () {
+          const prompt_texts = new_value;
+          if (prompt_texts.length > 0) {
+            let firstTime = true;
+            while (prompt_texts.length > 0) {
+              if (!firstTime) {
+                yield new Promise((resolve) => setTimeout(resolve, 2e3));
+              }
+              if (!firstTime && chatgpt.isGenerating()) {
+                continue;
+              }
+              firstTime = false;
+              const prompt_text = prompt_texts.shift() || "";
+              chatgpt.send(prompt_text);
+            }
+          }
+        }), 0);
+        GM_setValue(key, []);
+      }));
+    }
   }
   var chatgpt = {
     getTextarea,
@@ -141,8 +199,11 @@
     getTextareaValue,
     setTextarea,
     send,
+    regenerate,
     onSend,
-    waitForIdle
+    isGenerating,
+    waitForIdle,
+    setListener
   };
   var chatgpt_default = chatgpt;
   function getSubmitButton2() {
